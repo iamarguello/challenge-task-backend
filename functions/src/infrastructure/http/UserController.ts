@@ -5,13 +5,15 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import { plainToInstance } from 'class-transformer';
 import { UserCreateDto } from '../../domain/models/user.create';
 import { validateOrReject } from 'class-validator';
+import { AuthDto } from '../../domain/models/auth.dto';
 
 export class UserController {
 
   static async authUser(req: Request, res: Response) : Promise<Response> {
     try {
       const { email } = req.body ; 
-      if (!email) return res.status(400).json({ error: 'Email requerido' });
+      const dto = plainToInstance(AuthDto, email);
+      await validateOrReject(dto, { whitelist: true, forbidNonWhitelisted: true, })
 
       const user = await getUserUseCase.execute(email);
       if(!user){
