@@ -11,11 +11,9 @@ export class UserController {
 
   static async authUser(req: Request, res: Response) : Promise<Response> {
     try {
-      const { email } = req.body ; 
-      const dto = plainToInstance(AuthDto, email);
+      const dto = plainToInstance(AuthDto, req.body);
       await validateOrReject(dto, { whitelist: true, forbidNonWhitelisted: true, })
-
-      const user = await getUserUseCase.execute(email);
+      const user = await getUserUseCase.execute(dto.email);
       if(!user){
         return res.status(404).json({ message: "Usuario no existe", data: { code: "NOTFOUND" } });
       }
@@ -23,7 +21,7 @@ export class UserController {
       const secret = process.env.PWD_SECRET!;
       const claims = { expiresIn: "1h"} as SignOptions;
       const token = jwt.sign({ email: user?.email, id: user?.id }, secret, claims )
-
+      
       return res.status(200).json({ message: "Usuario logueado", data: { token: token, user: user } });
 
     } catch (error) {
@@ -39,7 +37,6 @@ export class UserController {
       
       return res.status(201).json({ message: 'Usuario registrado', data: newUser });
     } catch (error) {
-      console.log(error);
       return res.status(400).json({ message: 'Error al crear usuario', error: error });
     }
   }

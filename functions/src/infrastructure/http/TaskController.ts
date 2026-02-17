@@ -21,7 +21,6 @@ export class TaskController {
     try {      
       const userId = (req as any).user?.id;
       const dto = { ...req.body, userId };
-      console.log('dto', dto);
       const dtoTask = plainToInstance(TaskCreateDto, dto);
       
       await validateOrReject(dtoTask, { whitelist: true, forbidNonWhitelisted: true, })
